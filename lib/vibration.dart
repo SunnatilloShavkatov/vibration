@@ -1,15 +1,17 @@
-import 'dart:async';
-import 'dart:io';
+import "dart:async";
+import "dart:io";
 
-import 'package:flutter/services.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import "package:device_info_plus/device_info_plus.dart";
+import "package:flutter/services.dart";
 
 /// Platform-independent vibration methods.
-class Vibration {
+sealed class Vibration {
+  Vibration._();
+
   static final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   /// Method channel to communicate with native code.
-  static const MethodChannel _channel = const MethodChannel('vibration');
+  static const MethodChannel _channel = MethodChannel("vibration");
 
   /// Check if vibrator is available on device.
   ///
@@ -21,7 +23,7 @@ class Vibration {
   static Future<bool?> hasVibrator() async {
     try {
       if (Platform.isAndroid) {
-        final deviceData = await deviceInfo.androidInfo;
+        final AndroidDeviceInfo deviceData = await deviceInfo.androidInfo;
 
         if (!deviceData.isPhysicalDevice) {
           return false;
@@ -29,7 +31,7 @@ class Vibration {
 
         return true;
       } else if (Platform.isIOS) {
-        final deviceData = await deviceInfo.iosInfo;
+        final IosDeviceInfo deviceData = await deviceInfo.iosInfo;
 
         if (!deviceData.isPhysicalDevice) {
           return false;
@@ -39,7 +41,10 @@ class Vibration {
       }
     } on PlatformException {
       return false;
-    } on UnsupportedError {
+    } on Exception catch (e) {
+      if (e is UnsupportedError) {
+        return false;
+      }
       return false;
     }
 
@@ -56,7 +61,7 @@ class Vibration {
   static Future<bool?> hasAmplitudeControl() async {
     try {
       if (Platform.isAndroid) {
-        final deviceData = await deviceInfo.androidInfo;
+        final AndroidDeviceInfo deviceData = await deviceInfo.androidInfo;
 
         if (!deviceData.isPhysicalDevice) {
           return false;
@@ -64,7 +69,7 @@ class Vibration {
 
         return _channel.invokeMethod("hasAmplitudeControl");
       } else if (Platform.isIOS) {
-        final deviceData = await deviceInfo.iosInfo;
+        final IosDeviceInfo deviceData = await deviceInfo.iosInfo;
 
         if (!deviceData.isPhysicalDevice) {
           return false;
@@ -74,7 +79,10 @@ class Vibration {
       }
     } on PlatformException {
       return false;
-    } on UnsupportedError {
+    } on Exception catch (e) {
+      if (e is UnsupportedError) {
+        return false;
+      }
       return false;
     }
 
@@ -98,7 +106,7 @@ class Vibration {
     try {
       return await _channel.invokeMethod("hasCustomVibrationsSupport");
     } on MissingPluginException {
-      return Future.value(false);
+      return Future<bool>.value(false);
     }
   }
 
@@ -117,19 +125,19 @@ class Vibration {
   /// ```
   static Future<void> vibrate({
     int duration = 500,
-    List<int> pattern = const [],
+    List<int> pattern = const <int>[],
     int repeat = -1,
-    List<int> intensities = const [],
+    List<int> intensities = const <int>[],
     int amplitude = -1,
   }) =>
       _channel.invokeMethod(
         "vibrate",
-        {
+        <String, Object>{
           "duration": duration,
           "pattern": pattern,
           "repeat": repeat,
           "amplitude": amplitude,
-          "intensities": intensities
+          "intensities": intensities,
         },
       );
 

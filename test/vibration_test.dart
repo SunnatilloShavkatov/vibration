@@ -1,11 +1,13 @@
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:vibration/vibration.dart';
+// ignore_for_file: always_specify_types
+
+import "package:flutter/services.dart";
+import "package:flutter_test/flutter_test.dart";
+import "package:vibration/vibration.dart";
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const MethodChannel channel = MethodChannel('vibration');
+  const MethodChannel channel = MethodChannel("vibration");
   final List<MethodCall> log = <MethodCall>[];
 
   setUp(() {
@@ -17,15 +19,13 @@ void main() {
     });
   });
 
-  tearDown(() {
-    log.clear();
-  });
+  tearDown(log.clear);
 
-  group('hasVibrator', () {
+  group("hasVibrator", () {
     test(
-      'returns false',
+      "returns false",
       () async {
-        bool? hasVibrator = await Vibration.hasVibrator();
+        final bool? hasVibrator = await Vibration.hasVibrator();
 
         expect(
           hasVibrator,
@@ -34,60 +34,60 @@ void main() {
       },
     );
 
-    test('throws PlatformException', () async {
+    test("throws PlatformException", () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        throw PlatformException(code: 'error');
+        throw PlatformException(code: "error");
       });
 
-      final hasVibrator = await Vibration.hasVibrator();
+      final bool? hasVibrator = await Vibration.hasVibrator();
 
       throwsA(isA<PlatformException>());
       expect(hasVibrator, isFalse);
     });
 
-    test('throws UnsupportedError', () async {
+    test("throws UnsupportedError", () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        throw UnsupportedError('error');
+        throw UnsupportedError("error");
       });
 
-      final hasVibrator = await Vibration.hasVibrator();
+      final bool? hasVibrator = await Vibration.hasVibrator();
 
       throwsA(isA<UnsupportedError>());
       expect(hasVibrator, isFalse);
     });
   });
 
-  group('hasAmplitudeControl', () {
+  group("hasAmplitudeControl", () {
     test(
-      'returns false',
+      "returns false",
       () async {
-        bool? hasAmplitudeControl = await Vibration.hasAmplitudeControl();
+        final bool? hasAmplitudeControl = await Vibration.hasAmplitudeControl();
 
         expect(hasAmplitudeControl, isFalse);
       },
     );
 
-    test('throws PlatformException', () async {
+    test("throws PlatformException", () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        throw PlatformException(code: 'error');
+        throw PlatformException(code: "error");
       });
 
-      final hasAmplitudeControl = await Vibration.hasAmplitudeControl();
+      final bool? hasAmplitudeControl = await Vibration.hasAmplitudeControl();
 
       throwsA(isA<PlatformException>());
       expect(hasAmplitudeControl, isFalse);
     });
 
-    test('throws UnsupportedError', () async {
+    test("throws UnsupportedError", () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        throw UnsupportedError('error');
+        throw UnsupportedError("error");
       });
 
-      final hasAmplitudeControl = await Vibration.hasAmplitudeControl();
+      final bool? hasAmplitudeControl = await Vibration.hasAmplitudeControl();
 
       throwsA(isA<UnsupportedError>());
       expect(hasAmplitudeControl, isFalse);
@@ -95,53 +95,59 @@ void main() {
   });
 
   test(
-    'vibrate with duration',
+    "vibrate with duration",
     () async {
       await Vibration.vibrate(duration: 100);
 
       expect(
         log,
         <Matcher>[
-          isMethodCall('vibrate', arguments: <String, Object>{
-            'duration': 100,
-            'pattern': [],
-            'repeat': -1,
-            'amplitude': -1,
-            'intensities': []
-          })
+          isMethodCall(
+            "vibrate",
+            arguments: <String, Object>{
+              "duration": 100,
+              "pattern": [],
+              "repeat": -1,
+              "amplitude": -1,
+              "intensities": [],
+            },
+          ),
         ],
       );
     },
   );
 
   test(
-    'vibrate with pattern',
+    "vibrate with pattern",
     () async {
-      await Vibration.vibrate(pattern: [100, 200, 400], repeat: 1);
+      await Vibration.vibrate(pattern: <int>[100, 200, 400], repeat: 1);
 
       expect(
         log,
         <Matcher>[
-          isMethodCall('vibrate', arguments: <String, Object>{
-            'duration': 500,
-            'pattern': [100, 200, 400],
-            'repeat': 1,
-            'amplitude': -1,
-            'intensities': []
-          })
+          isMethodCall(
+            "vibrate",
+            arguments: <String, Object>{
+              "duration": 500,
+              "pattern": <int>[100, 200, 400],
+              "repeat": 1,
+              "amplitude": -1,
+              "intensities": [],
+            },
+          ),
         ],
       );
     },
   );
 
   test(
-    'cancel vibration',
+    "cancel vibration",
     () async {
       await Vibration.cancel();
 
       expect(
         log,
-        <Matcher>[isMethodCall('cancel', arguments: null)],
+        <Matcher>[isMethodCall("cancel", arguments: null)],
       );
     },
   );

@@ -73,3 +73,4 @@ build/
 /android/app/.settings
 /android/app/.classpath
 /android/app/.project
+.flutter-plugins-dependencies

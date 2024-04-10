@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import '../lib/main.dart';
+import "package:flutter/material.dart";
+import "package:flutter_test/flutter_test.dart";
+import "package:vibration_example/main.dart";
 
 void main() {
   testWidgets(
-    'Buttons rendered',
+    "Buttons rendered",
     (WidgetTester tester) async {
-      await tester.pumpWidget(VibratingApp());
+      await tester.pumpWidget(const VibratingApp());
 
       expect(
         find.byWidgetPredicate(
