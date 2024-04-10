@@ -8,6 +8,7 @@
 /captures
 /.settings
 /gradle/wrapper/gradle-wrapper.jar
+/gradle/
 /.project
 /.classpath
 /gradle.properties
