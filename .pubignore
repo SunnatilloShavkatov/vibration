@@ -1,0 +1,8 @@
+/.idea/
+/.dart_tool/
+/.packages/
+/.pub/
+/.vscode/
+/build/
+pubspec.lock
+/example/
