@@ -10,17 +10,21 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
     private let isDevice = true
 #endif
     
+    @available(iOS 13.0, *)
     public static var engine: CHHapticEngine?
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "vibration", binaryMessenger: registrar.messenger())
         let instance = VibrationPluginSwift()
-        
-        VibrationPluginSwift.createEngine()
-        
+
+        if #available(iOS 13.0, *) {
+            VibrationPluginSwift.createEngine()
+        }
+
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
+    @available(iOS 13.0, *)
     public static func createEngine() {
         // Create and configure a haptic engine.
         do {
@@ -29,21 +33,21 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
             print("Engine creation error: \(error)")
             return
         }
-        
+
         if VibrationPluginSwift.engine == nil {
             print("Failed to create engine!")
         }
-        
+
         // The stopped handler alerts you of engine stoppage due to external causes.
         VibrationPluginSwift.engine?.stoppedHandler = { reason in
             print("The engine stopped for reason: \(reason.rawValue)")
         }
-        
+
         // The reset handler provides an opportunity for your app to restart the engine in case of failure.
         VibrationPluginSwift.engine?.resetHandler = {
             // Try restarting the engine.
             print("The engine reset --> Restarting now!")
-            
+
             do {
                 try VibrationPluginSwift.engine?.start()
             } catch {
@@ -51,20 +55,27 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
             }
         }
     }
-    
+
     private func supportsHaptics() -> Bool {
-        return CHHapticEngine.capabilitiesForHardware().supportsHaptics
+        if #available(iOS 13.0, *) {
+            return CHHapticEngine.capabilitiesForHardware().supportsHaptics
+        }
+
+        return false;
     }
-    
+
+    @available(iOS 13.0, *)
     private func playPattern(myArgs: [String: Any], pattern: [Int]) -> Void {
+        // Get event parameters, if any
+        var params: [CHHapticEventParameter] = []
         //var amplitudes: [Int] = []
         let amplitudes = myArgs["intensities"] as! [Int]
-        
+
         // Create haptic events
         var hapticEvents: [CHHapticEvent] = []
         var i: Int = 0
         var rel: Double = 0.0
-        
+
         while i < pattern.count {
             // Get intensity parameter, if any
             if (i < amplitudes.count) {
@@ -102,7 +113,7 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
             print("Failed to play pattern: \(error.localizedDescription).")
         }
     }
-    
+    @available(iOS 13.0, *)
     private func cancelVibration() {
         VibrationPluginSwift.engine?.stop(completionHandler: { error in
             if let error = error {
@@ -112,7 +123,7 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
             }
         })
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "hasCustomVibrationsSupport":
@@ -122,37 +133,37 @@ public class VibrationPluginSwift: NSObject, FlutterPlugin {
                 result(false)
                 return
             }
-            
+
             guard let myArgs = args as? [String: Any] else {
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 result(true)
                 return
             }
-            
+
             guard let pattern = myArgs["pattern"] as? [Int] else {
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 result(true)
                 return
             }
-            
+
             if pattern.count == 0 {
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 result(true)
                 return
             }
-            
+
             assert(pattern.count % 2 == 0, "Pattern must have even number of elements!")
-            
+
             if !supportsHaptics() {
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 result(true)
                 return
             }
-            
+
             if #available(iOS 13.0, *) {
                 playPattern(myArgs: myArgs, pattern: pattern)
             }
-            
+
             result(isDevice)
         case "cancel":
             if #available(iOS 13.0, *) {
